@@ -1,42 +1,46 @@
 package com.example.innotech_hw1;
 
+import com.example.innotech_hw1.dao.PhrasesDao;
+import com.example.innotech_hw1.exception.MyException;
+import com.example.innotech_hw1.model.Phrase;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ThreadLocalRandom;
 
 
 @WebServlet("/v1/support")
 public class HelpServiceServlet extends HttpServlet {
-    public ArrayList<String> getWords() {
+
+    private final PhrasesDao words= new PhrasesDao();
+
+    public PhrasesDao getWords() {
         return words;
     }
 
-    private final ArrayList<String> words = new ArrayList<>();
-
     @Override
     public void init(){
-        words.add("У тебя все получится");
+        words.getWords().add(new Phrase("У тебя все получится"));
     }
 
-
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws  IOException {
-        int random = ThreadLocalRandom.current().nextInt(0, words.size());
-        String message=words.get(random);
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
         resp.setContentType("text/plain");
         try (var writer = resp.getWriter()) {
-            writer.write(message);
+            writer.write(words.getRandomPhrase());
+        } catch (IOException e) {
+            throw new MyException("Не вывести фразу");
         }
     }
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws  IOException {
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try (var reader = req.getReader()) {
-            words.add(reader.readLine());
+            words.getWords().add(new Phrase(reader.readLine()));
+            resp.setContentType("text/plain");
+        } catch (IOException e) {
+            throw new MyException("Не удалось добавить фразу");
         }
     }
 
