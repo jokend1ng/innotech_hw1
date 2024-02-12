@@ -10,6 +10,7 @@ import com.example.springframework.annotation.stereotype.GetMapping;
 import com.example.springframework.annotation.stereotype.PostMapping;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static java.lang.invoke.ConstantBootstraps.invoke;
 
+@WebServlet("/")
 public class DispatcherServlet extends HttpServlet {
 
 
@@ -43,7 +46,7 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         for (Class<?> c : classes) {
             Optional<Method> first = Arrays.stream(c.getMethods())
                     .filter(method ->
@@ -51,10 +54,15 @@ public class DispatcherServlet extends HttpServlet {
                                     method.getAnnotation(GetMapping.class).value().equals(req.getRequestURI()))
                     .findFirst();
             if (first.isPresent()) {
-                try (var writer = resp.getWriter()) {
-                    writer.write(objectMapper.writeValueAsString(applicationContext.getLogging(dao.getRandomPhrase())));
+                try {
+                    Object invoke = first.get().invoke(c);
                     resp.setContentType("application/json");
                     resp.setStatus(200);
+                    resp.getWriter().write(objectMapper.writeValueAsString(invoke));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
                 } catch (IOException e) {
                     throw new MyException("Не вывести фразу");
                 }
@@ -64,20 +72,24 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        for (Class<?> c : classes) {
-            Optional<Method> first = Arrays.stream(c.getMethods())
+        for (Object c : classes) {
+            Optional<Method> first = Arrays.stream(c.getClass().getMethods())
                     .filter(method ->
                             method.isAnnotationPresent(PostMapping.class) &&
                                     method.getAnnotation(PostMapping.class).value().equals(req.getRequestURI()))
                     .findFirst();
             if (first.isPresent()) {
-
                 try (var reader = req.getReader()) {
-                    Phrase phrase = objectMapper.readValue(reader.readLine(), Phrase.class);
-                    applicationContext.getLogging(dao.getWords().add(phrase));
+                   String line = objectMapper.readValue(reader.readLine(),String.class);
+                   resp.setContentType("text/plain");
+                    Object invoke = first.get().invoke(line);
                     resp.setContentType("application/json");
                     resp.setStatus(200);
                 } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
