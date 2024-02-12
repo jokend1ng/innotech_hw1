@@ -56,6 +56,12 @@ public class ApplicationContext {
         getBeansFactory().setBean(classes);
         return classes;
     }
-
+    public Object getLogging(Object object) {
+        return Proxy.newProxyInstance(
+                object.getClass().getClassLoader(),
+                object.getClass().getInterfaces(),
+                new LoggingInvocationHandler(object)
+        );
+    }
 
 }

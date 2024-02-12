@@ -43,13 +43,7 @@ public class BeanFactoryImpl implements BeanFactory {
             getInstance().put(name, controller);
         }
     }
-    private Object getLogging(Object object) {
-        return Proxy.newProxyInstance(
-                object.getClass().getClassLoader(),
-                object.getClass().getInterfaces(),
-                new LoggingInvocationHandler(object)
-        );
-    }
+
 }
 
 

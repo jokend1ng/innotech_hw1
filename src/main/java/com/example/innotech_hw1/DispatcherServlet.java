@@ -20,21 +20,17 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 
-public class DispatcherServlet extends HttpServlet  {
+public class DispatcherServlet extends HttpServlet {
 
 
     private final ApplicationContext applicationContext = new ApplicationContext();
-    private PhrasesDao dao= (PhrasesDao) applicationContext.getBeansFactory().getBean("PhrasesDao");
-    private final ObjectMapper mapper = new ObjectMapper();
+    private PhrasesDao dao = (PhrasesDao) applicationContext.getBeansFactory().getBean("PhrasesDao");
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private final ObjectMapper objectMapper = new ObjectMapper();
-
 
     public PhrasesDao getDao() {
         return dao;
     }
-
-
 
 
     @Override
@@ -56,8 +52,9 @@ public class DispatcherServlet extends HttpServlet  {
                     .findFirst();
             if (first.isPresent()) {
                 try (var writer = resp.getWriter()) {
-                    writer.write(objectMapper.writeValueAsString(dao.getRandomPhrase()));
+                    writer.write(objectMapper.writeValueAsString(applicationContext.getLogging(dao.getRandomPhrase())));
                     resp.setContentType("application/json");
+                    resp.setStatus(200);
                 } catch (IOException e) {
                     throw new MyException("Не вывести фразу");
                 }
@@ -74,30 +71,18 @@ public class DispatcherServlet extends HttpServlet  {
                                     method.getAnnotation(PostMapping.class).value().equals(req.getRequestURI()))
                     .findFirst();
             if (first.isPresent()) {
-                try {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    req.getReader().lines().forEach(stringBuilder::append);
-                    Optional<Class<?>> parameter = Arrays.stream(first.get().getParameterTypes()).findFirst();
-                    Object result;
-                    if (parameter.isPresent()) {
-                        result = first.get().invoke(applicationContext.getBeansFactory().getBean(c.getSimpleName()),
-                                objectMapper.readValue(stringBuilder.toString(), parameter.get()));
-                    } else {
-                        result = first.get().invoke(applicationContext.getBeansFactory().getBean(c.getSimpleName()));
-                    }
+
+                try (var reader = req.getReader()) {
+                    Phrase phrase = objectMapper.readValue(reader.readLine(), Phrase.class);
+                    applicationContext.getLogging(dao.getWords().add(phrase));
                     resp.setContentType("application/json");
-                    if (result != null) {
-                           resp.getWriter().print(objectMapper.writeValueAsString(result));
-                    }
-                } catch (IllegalAccessException | IOException e) {
-                    resp.setStatus(204);
-                } catch (InvocationTargetException e) {
+                    resp.setStatus(200);
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            } else {
-                resp.setStatus(404);
             }
-        }
-    }
 
+        }
+
+    }
 }
