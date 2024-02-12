@@ -1,5 +1,6 @@
 package com.example.innotech_hw1;
 
+import com.example.innotech_hw1.controllers.ControlServlet;
 import com.example.innotech_hw1.dao.PhrasesDao;
 import com.example.innotech_hw1.exception.MyException;
 import com.example.innotech_hw1.model.Phrase;
@@ -27,7 +28,8 @@ public class DispatcherServlet extends HttpServlet {
 
 
     private final ApplicationContext applicationContext = new ApplicationContext();
-    private PhrasesDao dao = (PhrasesDao) applicationContext.getBeansFactory().getBean("PhrasesDao");
+    private PhrasesDao dao;
+    private ControlServlet controlServlet;
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -38,8 +40,11 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+
         classes = applicationContext.scanPackage("com.example", Controller.class);
         applicationContext.scanComponent("com.example");
+        controlServlet =(ControlServlet) applicationContext.getBeansFactory().getBean("ControlServlet");
+        dao=(PhrasesDao) applicationContext.getBeansFactory().getBean("PhrasesDao");
         applicationContext.getAutowired();
         dao.getWords().add(new Phrase("у тебя все получится"));
 
@@ -54,8 +59,10 @@ public class DispatcherServlet extends HttpServlet {
                                     method.getAnnotation(GetMapping.class).value().equals(req.getRequestURI()))
                     .findFirst();
             if (first.isPresent()) {
+//                try {
+
                 try {
-                    Object invoke = first.get().invoke(c);
+                    Object invoke = first.get().invoke(controlServlet);
                     resp.setContentType("application/json");
                     resp.setStatus(200);
                     resp.getWriter().write(objectMapper.writeValueAsString(invoke));
@@ -63,8 +70,6 @@ public class DispatcherServlet extends HttpServlet {
                     throw new RuntimeException(e);
                 } catch (InvocationTargetException e) {
                     throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new MyException("Не вывести фразу");
                 }
             }
         }
@@ -72,17 +77,16 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        for (Object c : classes) {
-            Optional<Method> first = Arrays.stream(c.getClass().getMethods())
+        for (Class<?> c : classes) {
+            Optional<Method> first = Arrays.stream(c.getMethods())
                     .filter(method ->
                             method.isAnnotationPresent(PostMapping.class) &&
                                     method.getAnnotation(PostMapping.class).value().equals(req.getRequestURI()))
                     .findFirst();
             if (first.isPresent()) {
                 try (var reader = req.getReader()) {
-                   String line = objectMapper.readValue(reader.readLine(),String.class);
-                   resp.setContentType("text/plain");
-                    Object invoke = first.get().invoke(line);
+                    String line = objectMapper.readValue(reader.readLine(), String.class);
+                    Object invoke = first.get().invoke(controlServlet,line);
                     resp.setContentType("application/json");
                     resp.setStatus(200);
                 } catch (IOException e) {

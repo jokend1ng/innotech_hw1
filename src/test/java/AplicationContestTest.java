@@ -23,7 +23,7 @@ public class AplicationContestTest {
     public void getAutowiredBeanAfterAplicationContextIsStart(){
         test.scanComponent("com.example");
         test.scanControllers("com.example");
-        PhrasesDao pD= (PhrasesDao)test.getBeansFactory().getBean("PhrasesDao");
+        PhrasesDao pD= (PhrasesDao)test.getBeansFactory().getBean(String.valueOf(PhrasesDao.class));
         ControlServlet cS =(ControlServlet) test.getBeansFactory().getBean("ControlServlet");
         pD.getWords().add(new Phrase("У тебя все получится"));
         test.getAutowired();
