@@ -53,7 +53,7 @@ public class ApplicationContext {
     public Set<Class<?>> scanPackage(String s, Class<? extends Annotation> clas) {
         Reflections reflections = new Reflections(s);
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(clas);
-        getBeansFactory().setBean(classes);
+        getLogging(getBeansFactory().setBean(classes));
         return classes;
     }
     public Object getLogging(Object object) {

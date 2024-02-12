@@ -20,7 +20,7 @@ public class BeanFactoryImpl implements BeanFactory {
     }
 
     @Override
-    public void setBean( Set<Class<?>> clazz) {
+    public Object setBean(Set<Class<?>> clazz) {
         String name = null;
         Object controller = null;
         for (Class<?> claz : clazz)
@@ -48,6 +48,7 @@ public class BeanFactoryImpl implements BeanFactory {
         } else {
             getInstance().put(name, controller);
         }
+        return controller;
     }
 
 }
