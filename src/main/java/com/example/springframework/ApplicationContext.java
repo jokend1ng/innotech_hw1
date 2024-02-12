@@ -6,6 +6,7 @@ import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;;
+import java.lang.reflect.Proxy;
 import java.util.Set;
 
 
@@ -24,7 +25,6 @@ public class ApplicationContext {
                     try {
                         Object objectInstance = getBeansFactory().getBean(field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
                         field.set(object, objectInstance);
-
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
@@ -56,5 +56,6 @@ public class ApplicationContext {
         getBeansFactory().setBean(classes);
         return classes;
     }
+
 
 }

@@ -20,14 +20,21 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 
-public class DispatcherServletImpl extends HttpServlet {
+public class DispatcherServlet extends HttpServlet  {
+
 
     private final ApplicationContext applicationContext = new ApplicationContext();
+    private PhrasesDao dao= (PhrasesDao) applicationContext.getBeansFactory().getBean("PhrasesDao");
     private final ObjectMapper mapper = new ObjectMapper();
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    @Autowred
-    private PhrasesDao dao;
+
+
+    public PhrasesDao getDao() {
+        return dao;
+    }
+
+
 
 
     @Override

@@ -19,9 +19,9 @@ public class LoggingInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.isAnnotationPresent(Logged.class)) {
-            logger.info("Start invoking method [%s]".formatted(method.getName()));
+            logger.info("Начало выполнения метода  [%s]".formatted(method.getName()));
             Object invoke = method.invoke(target, args);
-            logger.info("Method [%s] invoked with result [%s]".formatted(method.getName(), invoke));
+            logger.info("Метож [%s] выполнен с результатом [%s]".formatted(method.getName(), invoke));
             return invoke;
         }
         return method.invoke(target, args);

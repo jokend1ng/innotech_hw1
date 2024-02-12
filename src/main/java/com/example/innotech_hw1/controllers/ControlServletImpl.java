@@ -10,11 +10,11 @@ public class ControlServletImpl implements ControlServlet {
 
     @Override
     public String getPhrase() {
-        return phrasesDao.getRandomPhrase();
+        return this.phrasesDao.getRandomPhrase();
     }
 
     @Override
     public void addPhrase(String phrase) {
-        phrasesDao.getWords().add(new Phrase(phrase));
+        this.phrasesDao.getWords().add(new Phrase(phrase));
     }
 }

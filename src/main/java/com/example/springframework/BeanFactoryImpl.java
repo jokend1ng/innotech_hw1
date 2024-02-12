@@ -1,6 +1,7 @@
 package com.example.springframework;
 
 
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,13 @@ public class BeanFactoryImpl implements BeanFactory {
         } else {
             getInstance().put(name, controller);
         }
+    }
+    private Object getLogging(Object object) {
+        return Proxy.newProxyInstance(
+                object.getClass().getClassLoader(),
+                object.getClass().getInterfaces(),
+                new LoggingInvocationHandler(object)
+        );
     }
 }
 
