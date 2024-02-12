@@ -15,8 +15,7 @@ public class PhrasesDaoImpl implements PhrasesDao {
     public String getRandomPhrase() {
         int random = ThreadLocalRandom.current().nextInt(0, words.size());
         Phrase phrase= words.get(random);
-        System.out.println(words.get(random).message());
-        return phrase.message();
+       return phrase.message();
     }
 
     @Override

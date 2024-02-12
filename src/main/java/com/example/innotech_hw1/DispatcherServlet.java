@@ -56,7 +56,7 @@ public class DispatcherServlet extends HttpServlet  {
                     .findFirst();
             if (first.isPresent()) {
                 try (var writer = resp.getWriter()) {
-                    writer.write(dao.getRandomPhrase());
+                    writer.write(objectMapper.writeValueAsString(dao.getRandomPhrase()));
                     resp.setContentType("application/json");
                 } catch (IOException e) {
                     throw new MyException("Не вывести фразу");

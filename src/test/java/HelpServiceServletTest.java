@@ -41,6 +41,8 @@ public class HelpServiceServletTest {
         when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
         servlet.doGet(request, response);
         assertEquals(servlet.getDao().getWords().size(), 1);
+        assertEquals(servlet.getDao().getRandomPhrase(),"у тебя все получится");
+
 
     }
 
