@@ -1,24 +1,20 @@
 
-import com.example.innotech_hw1.HelpServiceServlet;
-import com.example.innotech_hw1.Phrase;
-import com.example.innotech_hw1.PhrasesDao;
+import com.example.innotech_hw1.*;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
-@WebMvcTest(HelpServiceServlet.class)
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {HelpServiceServletTest.class})
+@WebMvcTest(HttpServletController.class)
+@SpringBootTest
 public class HelpServiceServletTest {
 
 
@@ -26,7 +22,7 @@ public class HelpServiceServletTest {
         MockMvc mvc;
 
         @MockBean
-        PhrasesDao repository;
+        PhrasesDaoImpl repository;
 
         @Test
         void getRequest() throws Exception {
