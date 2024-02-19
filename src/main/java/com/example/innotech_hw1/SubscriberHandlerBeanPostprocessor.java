@@ -1,47 +1,56 @@
 package com.example.innotech_hw1;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
+
+
 
 import org.example.MessageQueue;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-import java.lang.reflect.InvocationHandler;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SubscriberHandlerBeanPostprocessor implements BeanPostProcessor {
-    private MessageQueue queue;
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        Method[] methods  = bean.getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(Subscriber.class)){
+    private final MessageQueue queue;
+    private final Map<Object, Method> subscribers = new HashMap<>();
+    public SubscriberHandlerBeanPostprocessor(MessageQueue queue) {
+        this.queue = queue;
+    }
 
-                return Proxy.newProxyInstance(method.getClass().getClassLoader(), method.getClass().getInterfaces(), (proxy, method1, args) -> {
-                    Class<?> clazz = method1.getClass();
-                    if (method1.isAnnotationPresent(Subscriber.class)){
-                        new Thread(()-> {
-                            while(true){
-                               String message= queue.poll();
-                                if(message!=null){
-                                    try {
-                                      Object[] parameters = new Object[]{message};
-                                       method1.invoke(clazz, parameters);
-                                    } catch (IllegalAccessException e) {
-                                        throw new RuntimeException(e);
-                                    } catch (InvocationTargetException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    return  method1.invoke(clazz,args);
-                });
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        Method[] methods = bean.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(Subscriber.class)) {
+                subscribers.put(bean, method);
             }
+
         }
         return bean;
+    }
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                 new Thread(() -> {
+                    while (true) {
+                        String message = queue.poll();
+                        if (message != null) {
+                            subscribers.forEach((originalbean, method) ->
+                            {
+                                try {
+                                    method.setAccessible(true);
+                                    method.invoke(originalbean, message);
+                                } catch (IllegalAccessException e) {
+                                    throw new RuntimeException(e);
+                                } catch (InvocationTargetException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                        }
+
+                        }
+                    }).start();
+            return bean;
     }
 }

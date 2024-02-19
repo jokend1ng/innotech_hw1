@@ -1,56 +1,52 @@
 
 import com.example.innotech_hw1.HelpServiceServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.innotech_hw1.Phrase;
+import com.example.innotech_hw1.PhrasesDao;
+
 import org.junit.jupiter.api.Test;
-import java.io.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
-
-
+@WebMvcTest(HelpServiceServlet.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {HelpServiceServletTest.class})
 public class HelpServiceServletTest {
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-    private HelpServiceServlet servlet;
 
-    @BeforeEach
-    public void before() {
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
-        servlet = new HelpServiceServlet();
 
-        servlet.init();
-    }
+        @Autowired
+        MockMvc mvc;
 
-    @Test
-    void getTextFromResponse() throws IOException {
-        StringWriter stringWriter = new StringWriter();
-        when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
-        servlet.doGet(request, response);
-        assertEquals(stringWriter.toString(), "У тебя все получится");
-        assertEquals(servlet.getWords().getWords().size(), 1);
+        @MockBean
+        PhrasesDao repository;
 
-    }
+        @Test
+        void getRequest() throws Exception {
+            Mockito.when(repository.getRandomPhrase()).thenReturn(new Phrase("Any phrase"));
+            mvc.perform(MockMvcRequestBuilders.get("/help-service/v1/support"))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.phrase").value("Any phrase"));
+        }
 
-    @Test
-    void getContentTypeFromResponse() throws IOException {
-        StringWriter stringWriter = new StringWriter();
-        when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
-        when(response.getContentType()).thenReturn("text/plain");
-        servlet.doGet(request, response);
-        assertEquals(response.getContentType(),"text/plain");
-    }
 
-    @Test
-    void getSizeOfListAfterPost() throws IOException {
-        when(request.getReader()).thenReturn(new BufferedReader(new StringReader("Не унывайте пацаны!")));
-        servlet.doPost(request, response);
-        assertEquals(servlet.getWords().getWords().size(), 2);
+        @Test
+        void postRequest() throws Exception {
+            Mockito.doNothing().when(repository).addPhrase(Mockito.any());
+            mvc.perform((MockMvcRequestBuilders.post("/help-service/v1/support"))
+                            .contentType("application/json")
+                            .content("""
+                                 {
+                                 "phrase" : "Any phrase"
+                                 }
+                                """));
+        }
     }
 
 
-}

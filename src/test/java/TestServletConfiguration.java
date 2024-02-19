@@ -1,14 +1,14 @@
-package com.example.innotech_hw1;
-
+import com.example.innotech_hw1.PhrasesDao;
+import com.example.innotech_hw1.PhrasesDaoImpl;
+import com.example.innotech_hw1.SubscriberHandlerBeanPostprocessor;
 import org.example.MessageQueue;
 import org.example.Publisher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-@Configuration
-public class HttpServletConfiguration {
+
+@org.springframework.boot.test.context.TestConfiguration
+public class TestServletConfiguration {
+
     @Bean
-    @Autowired
     public Publisher PublisherBean(MessageQueue queue) {
         return new Publisher(queue);
     }
@@ -18,7 +18,7 @@ public class HttpServletConfiguration {
         return new MessageQueue();
     }
     @Bean
-    public SubscriberHandlerBeanPostprocessor  SubscriberHandlerBeanPostprocessorBean(MessageQueue queue){
+    public SubscriberHandlerBeanPostprocessor SubscriberHandlerBeanPostprocessorBean(MessageQueue queue){
         return  new SubscriberHandlerBeanPostprocessor(queue);
     }
 

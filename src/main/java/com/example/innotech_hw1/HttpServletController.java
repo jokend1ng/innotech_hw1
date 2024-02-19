@@ -7,16 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/help-service/v1/support")
 public class HttpServletController {
     private final Publisher publisher;
     private final PhrasesDao dao;
-    private final SubscriberHandlerBeanPostprocessor postprocessor;
 
-    public HttpServletController(Publisher publisher, PhrasesDao dao, SubscriberHandlerBeanPostprocessor postprocessor) {
+    public HttpServletController(Publisher publisher, PhrasesDao dao) {
         this.publisher = publisher;
         this.dao = dao;
-        this.postprocessor = postprocessor;
         publisher.publishMessage("Все получится!");
     }
 
