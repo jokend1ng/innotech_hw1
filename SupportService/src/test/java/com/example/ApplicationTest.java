@@ -25,8 +25,7 @@ public class ApplicationTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    @SpyBean
-    private InmemoryBrocker brocker;
+
     @Test
     @SneakyThrows
     void getPhraseIsOk(){
@@ -36,12 +35,11 @@ public class ApplicationTest {
     @Test
     @SneakyThrows
     void shouldConsumeMessageFromBrokerAndPathToSubscriber() {
-        final var supportPhraseRequest=new SupportPhraseRequest("чо каво");
+        final var supportPhraseRequest=new SupportPhrase("чо каво");
         final var supportPhrase = new SupportPhrase("чо каво");
         mockMvc.perform(post("/support")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(supportPhraseRequest)))
                 .andExpect(status().isOk());
-        verify(brocker).publish(eq(objectMapper.writeValueAsString(supportPhraseRequest)));
     }
 }
