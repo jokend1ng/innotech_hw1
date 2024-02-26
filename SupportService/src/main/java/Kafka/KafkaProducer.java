@@ -1,7 +1,6 @@
 package Kafka;
 
 import com.example.SupportPhrase;
-import com.example.SupportServiceAddPhrase;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +10,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-
+@Component
 @Slf4j
 @RequiredArgsConstructor
 @Getter
-@Component
 public class KafkaProducer  {
 
     @Value("${kafka.topics.test-topic}")

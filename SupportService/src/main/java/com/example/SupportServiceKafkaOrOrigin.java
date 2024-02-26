@@ -1,5 +1,6 @@
 package com.example;
 
+
 import Kafka.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SupportServiceKafkaOrOrigin  implements SupportServiceAddPhrase{
    private final SupportService service;
-    private final  KafkaProducer producer;
+    private final KafkaProducer producer;
     @Override
     public void addSupportPhrase(SupportPhrase phrase) {
     if (producer.isKafkaIsEnable()) {
