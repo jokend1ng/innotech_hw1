@@ -3,7 +3,7 @@ services:
   tomcat:
     image: tomcat:10.1.11
     ports:
-      - "8080:8080"
+      - "7777:7777"
     volumes:
       - ./out/artifacts/innotech_hw4_war/innotech_hw4_war.war:/usr/local/tomcat/webapps/help-service.war
     restart: on-failure
